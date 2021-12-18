@@ -13,10 +13,10 @@ int main(int argc, char *argv[]) {
                 cout << session.cmd_help() << endl;
             }
             else if (args[1] == "ls") {
-                cout << session.cmd_ls() << endl;
+                session.cmd_ls();
             }
             else if (args[1] == "report") {
-                cout << session.cmd_report() <<endl;
+                session.cmd_report();
             }
             break;
         case 3:

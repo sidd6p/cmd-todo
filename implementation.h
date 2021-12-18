@@ -5,14 +5,14 @@ using std::string;
 
 class ToDo {
     private:
-        string complete;
-        string task;
+        string complete_file;
+        string task_file;
     public:
         ToDo();
-        string cmd_ls();
-        bool cmd_add(string , string);
-        bool cmd_delete(string );
-        bool cmd_complete(string );
-        string cmd_report();
+        void cmd_ls();
+        void cmd_add(string , string);
+        void cmd_delete(string );
+        void cmd_complete(string );
+        void cmd_report();
         string cmd_help();
 };
