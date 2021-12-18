@@ -1,18 +1,20 @@
 #pragma once 
-#include <iostream>
+#include <bits/stdc++.h>
 
-using std::string;
+using namespace std;
 
 class ToDo {
     private:
         string complete_file;
         string task_file;
+        vector<int> priority_queue;
     public:
         ToDo();
         void cmd_ls();
         void cmd_add(string , string);
-        void cmd_delete(string );
-        void cmd_complete(string );
+        void cmd_delete(string);
+        void cmd_complete(string);
         void cmd_report();
+        void cmd_done(string);
         string cmd_help();
 };

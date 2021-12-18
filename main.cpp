@@ -1,5 +1,3 @@
-#include <iostream>
-#include <vector>
 #include "implementation.h"
 
 using namespace std;
@@ -8,6 +6,8 @@ int main(int argc, char *argv[]) {
     vector<string> args(argv, argv + argc);
     ToDo session;
     switch (argc) {
+        case 1:
+            cout << session.cmd_help() << endl;
         case 2:
             if (args[1] == "help") {
                 cout << session.cmd_help() << endl;
@@ -27,12 +27,19 @@ int main(int argc, char *argv[]) {
                 session.cmd_complete(args[2]);
             }
             break;
-        case 4:
-            if (args[1] == "add") {
-                session.cmd_add(args[2], args[3]);
-            }
-            break;
         default:
+            if (args[1] == "add") {
+                string task;
+                for (auto i = 3; i < argc; i++) {
+                    if (i == argc - 1){
+                        task += args[i];
+                    }
+                    else {
+                        task += args[i] + " ";
+                    }
+                }
+                session.cmd_add(args[2], task);
+            }
             break;
     }
     

@@ -1,6 +1,4 @@
 #include "implementation.h"
-#include <fstream>
-#include <iostream>
 
 using namespace std;
 
@@ -25,10 +23,27 @@ void ToDo::cmd_ls() {
 }
 
 void ToDo::cmd_add(string priority, string task) {
-    ofstream  fout;
+    int index = upper_bound(priority_queue.begin(), priority_queue.end(), stoi(priority)) - priority_queue.begin();
+    string before, after;
+    string new_line = task + " [" + priority + "]" + "\n";
     string line;
-    fout.open(task_file, ios::app);
-    fout << task << " [" << priority  << "]" << endl;
+    priority_queue.insert(index + priority_queue.begin(), stoi(priority));
+    ifstream fin;
+    fin.open(task_file);
+    while (fin) {
+        getline(fin, line);
+        if (index--) {
+            before += line + "\n";
+        }
+        else{
+            after += line + "\n";
+        }
+    }
+    fin.close();
+    ofstream  fout;
+    fout.open(task_file);
+    fout << before << new_line << after;
+    fout.close();
 }
 
 void ToDo::cmd_delete(string task_no) {
@@ -61,6 +76,10 @@ void ToDo::cmd_report() {
     }
 
     fin.close();
+}
+
+void ToDo::cmd_done(string priority) {
+
 }
 
 string ToDo::cmd_help() {
