@@ -8,6 +8,7 @@ class ToDo {
         string complete_file;
         string task_file;
         string meta_file;
+        string my_buff;
     public:
         ToDo();
         string cmd_ls();
