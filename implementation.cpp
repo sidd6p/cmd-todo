@@ -13,6 +13,7 @@ void ToDo::cmd_ls() {
     int files_count = 0;
     fin.open(task_file);
     getline(fin, task);
+    getline(fin, task);
     while(fin) {
         files_count++;
         cout << files_count << ". " << task << endl;
@@ -23,26 +24,43 @@ void ToDo::cmd_ls() {
 }
 
 void ToDo::cmd_add(string priority, string task) {
-    int index = upper_bound(priority_queue.begin(), priority_queue.end(), stoi(priority)) - priority_queue.begin();
-    string before, after;
-    string new_line = task + " [" + priority + "]" + "\n";
+    string before = "", after="";
+    string new_line = task + " [" + priority + "]";
     string line;
-    priority_queue.insert(index + priority_queue.begin(), stoi(priority));
+    string lines;
     ifstream fin;
+    string queue = "";
+
     fin.open(task_file);
-    while (fin) {
-        getline(fin, line);
-        if (index--) {
-            before += line + "\n";
-        }
-        else{
-            after += line + "\n";
+    getline(fin, queue);
+    queue += priority + " ";
+
+    for(auto i = 0; i != queue.size() && queue[i] != '\n'; i++) {
+        if (queue[i] != ' ') {
+            priority_queue.push_back(queue[i]-'0');
         }
     }
+
+    sort(priority_queue.begin(), priority_queue.end());
+    vector<int>::iterator index_itr = upper_bound(priority_queue.begin(), priority_queue.end(), stoi(priority));
+    int index = index_itr - priority_queue.begin();
+
+    getline(fin, lines);
+    int i = 0;
+    cout << lines << endl;
+    while (i < lines.size()+1) {
+        before += lines[i++];
+        if (i == index) {
+            before += new_line;
+        }
+    }
+
     fin.close();
-    ofstream  fout;
+
+    ofstream fout;
     fout.open(task_file);
-    fout << before << new_line << after;
+    fout << before;
+    // fout << queue << "\n" << before << new_line << after;
     fout.close();
 }
 
@@ -59,6 +77,7 @@ void ToDo::cmd_report() {
     fin.open(task_file);
     cout << "Pending : " << endl;
     getline(fin, task);
+    getline(fin, task);
     while(fin) {
         files_count++;
         cout << files_count << ". " << task << endl;
@@ -68,6 +87,7 @@ void ToDo::cmd_report() {
     fin.close();
     cout << "Completed : " << endl;
     fin.open(complete_file);
+    getline(fin, task);
     getline(fin, task);
     while(fin) {
         files_count++;
@@ -89,6 +109,6 @@ string ToDo::cmd_help() {
             "$ ./task del INDEX            # Delete the incomplete item with the given index\n" 
             "$ ./task done INDEX           # Mark the incomplete item with the given index as complete\n" 
             "$ ./task help                 # Show usage\n"
-            "$ ./task report               # Statistics\n";
+            "$ ./task report               # Statistics";
     return help_msg;
 }

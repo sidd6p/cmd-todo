@@ -8,6 +8,7 @@ int main(int argc, char *argv[]) {
     switch (argc) {
         case 1:
             cout << session.cmd_help() << endl;
+            break;
         case 2:
             if (args[1] == "help") {
                 cout << session.cmd_help() << endl;
