@@ -7,25 +7,25 @@ int main(int argc, char *argv[]) {
     ToDo session;
     switch (argc) {
         case 1:
-            cout << session.cmd_help() << endl;
+            cout << session.cmd_help();
             break;
         case 2:
             if (args[1] == "help") {
-                cout << session.cmd_help() << endl;
+                cout << session.cmd_help();
             }
             else if (args[1] == "ls") {
-                session.cmd_ls();
+                cout << session.cmd_ls();
             }
             else if (args[1] == "report") {
-                session.cmd_report();
+                cout << session.cmd_report();
             }
             break;
         case 3:
             if (args[1] == "del") {
-                session.cmd_delete(args[2]); 
+                cout << session.cmd_delete(args[2]); 
             }
             else if (args[1] == "done") {
-                session.cmd_complete(args[2]);
+                cout << session.cmd_done(args[2]);
             }
             break;
         default:
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
                         task += args[i] + " ";
                     }
                 }
-                session.cmd_add(args[2], task);
+                cout << session.cmd_add(args[2], task);
             }
             break;
     }
