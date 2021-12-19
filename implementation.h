@@ -7,6 +7,7 @@ class ToDo {
     private:
         string complete_file;
         string task_file;
+        string meta_file;
         vector<int> priority_queue;
     public:
         ToDo();

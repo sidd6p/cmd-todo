@@ -5,6 +5,7 @@ using namespace std;
 ToDo::ToDo() {
     complete_file = "complete.tx";
     task_file = "task.txt";
+    meta_file = "meta.txt";
 }
 
 void ToDo::cmd_ls() {
@@ -12,56 +13,56 @@ void ToDo::cmd_ls() {
     string task;
     int files_count = 0;
     fin.open(task_file);
-    getline(fin, task);
-    getline(fin, task);
-    while(fin) {
-        files_count++;
-        cout << files_count << ". " << task << endl;
-        getline(fin, task);
+    if (fin) {
+        while(!fin.eof()) {
+            getline(fin, task);
+            files_count++;
+            cout << files_count << ". " << task << endl;
+        }
     }
 
     fin.close();
 }
 
 void ToDo::cmd_add(string priority, string task) {
-    string before = "", after="";
+    string before = "", after = "", queue = "", lines = "", temp="";
     string new_line = task + " [" + priority + "]";
-    string line;
-    string lines;
-    ifstream fin;
-    string queue = "";
+    fstream file;
+    vector<string> output;
 
-    fin.open(task_file);
-    getline(fin, queue);
+    file.open(meta_file, ios::in);
+    getline(file, queue);
     queue += priority + " ";
+    stringstream ss(queue);
+    file.close();
+    file.open(meta_file, ios::out);
+    file << queue << endl;
+    file.close();
 
-    for(auto i = 0; i != queue.size() && queue[i] != '\n'; i++) {
-        if (queue[i] != ' ') {
-            priority_queue.push_back(queue[i]-'0');
-        }
+    while (ss >> temp) {
+        priority_queue.push_back(stoi(temp));
     }
 
     sort(priority_queue.begin(), priority_queue.end());
     vector<int>::iterator index_itr = upper_bound(priority_queue.begin(), priority_queue.end(), stoi(priority));
-    int index = index_itr - priority_queue.begin();
+    int index = index_itr - priority_queue.begin() - 1;
 
-    getline(fin, lines);
-    int i = 0;
-    cout << lines << endl;
-    while (i < lines.size()+1) {
-        before += lines[i++];
-        if (i == index) {
-            before += new_line;
+    file.open(task_file, ios::in);
+    if(file) {
+        while(!file.eof()) {
+            getline(file, lines);
+            output.push_back(lines);
         }
     }
-
-    fin.close();
-
-    ofstream fout;
-    fout.open(task_file);
-    fout << before;
-    // fout << queue << "\n" << before << new_line << after;
-    fout.close();
+    output.insert(output.begin() + index, new_line);
+    file.close();
+    
+    file.open(task_file, ios::out);
+    for (auto i=0; i<output.size()-1; i++) {
+        file << output[i] << endl;
+    }
+    file << output[output.size()-1];
+    file.close();
 }
 
 void ToDo::cmd_delete(string task_no) {
@@ -77,12 +78,13 @@ void ToDo::cmd_report() {
     fin.open(task_file);
     cout << "Pending : " << endl;
     getline(fin, task);
-    getline(fin, task);
-    while(fin) {
-        files_count++;
-        cout << files_count << ". " << task << endl;
-        getline(fin, task);
+    if (fin) {
+        while(!fin.eof()) {
+            files_count++;
+            cout << files_count << ". " << task << endl;
+            getline(fin, task);
 
+        }
     }
     fin.close();
     cout << "Completed : " << endl;
