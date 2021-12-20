@@ -18,3 +18,8 @@ class ToDo {
         string cmd_done(string);
         string cmd_help();
 };
+
+
+bool is_number(string);
+vector<string> display_data(string);
+string error_msg(int); 

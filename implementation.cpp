@@ -1,6 +1,4 @@
 #include "implementation.h"
-#include "support.h"
-
 using namespace std;
 
 ToDo::ToDo() {
@@ -10,7 +8,13 @@ ToDo::ToDo() {
 }
 
 string ToDo::cmd_ls() {
-    return display_data(task_file)[0];
+     vector<string> output = display_data(task_file);
+     if (output[1] != "0") {
+         return output[0];
+     }
+     else {
+         return "There are no pending tasks!";
+     }
 }
 
 string ToDo::cmd_add(string priority, string task) {
@@ -182,4 +186,42 @@ string ToDo::cmd_help() {
             "$ ./task help                 # Show usage\n"
             "$ ./task report               # Statistics\n";
     return help_msg;
+}
+
+
+
+bool is_number(string nums) {
+    for (char const num : nums) {
+        if (std::isdigit(num) == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+vector<string> display_data(string filename) {
+    ifstream fin;
+    string task;
+    string temp_output_1;
+    string temp_output_2;
+    vector<string> output;
+    int files_count = 0;
+    fin.open(filename);
+    if (fin) {
+        while(!fin.eof()) {
+            getline(fin, task);
+            files_count++;
+            temp_output_1 += to_string(files_count) + ". " + task + "\n";
+        }
+    }
+    fin.close();
+    temp_output_2 = to_string(files_count);
+    output.push_back(temp_output_1);
+    output.push_back(temp_output_2);
+    return output;
+}
+
+string error_msg(int i) {
+    vector<string> errors_mgs = {"Error: Missing tasks string. Nothing added!", "Error: Missing NUMBER for deleting tasks."};
+    return errors_mgs[i];
 }
