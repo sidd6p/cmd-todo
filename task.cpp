@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
         cout << session.cmd_report();
     }
     else if (args[1] == "done") {
-        cout << session.cmd_delete(args[2]);
+        cout << session.cmd_done(args[2]);
     }
     else if (args[1] == "del") {
         if (argc == 2) {
