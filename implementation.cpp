@@ -18,60 +18,49 @@ string ToDo::cmd_ls() {
 }
 
 string ToDo::cmd_add(string priority, string task) {
-    //validating the priority as non-negative number
-    if (!is_number(priority) || stoi(priority) < 0) {
-        return "Error: priority " + priority + " is invalid. Nothing added.\n";
-    }
-    // initalise
-    string queue = "", lines = "", temp="";
-    string new_line = task + " [" + priority + "]";
-    fstream file;
-    vector<string> output;
-    vector<int> priority_queue;
+    try {
+        // Validating the priority as non-negative number
+        if (!is_number(priority) || stoi(priority) < 0) {
+            throw "Error: priority " + priority + " is invalid. Nothing added.\n";
+        }
+        else {
+            fstream file;
+            string temp;
+            string new_task = "";
+            new_task += priority + " " + task;
+            vector<string> tasks;
 
-    // getting priority data from meta_file andupdating meta_file with new task priority 
-    file.open(meta_file, ios::in);
-    getline(file, queue);
-    queue += priority + " ";
-    stringstream ss(queue);
-    file.close();
-    file.open(meta_file, ios::out);
-    file << queue << endl;
-    file.close();
-    while (ss >> temp) {
-        priority_queue.push_back(stoi(temp));
-    }
+            // Retrieving previous tasks into vector
+            file.open(task_file, ios::in);
+            if (file) {
+                while (!file.eof()) {
+                    getline(file, temp);
+                    if (temp.size() == 0) {
+                        continue;
+                    }
+                    tasks.push_back(temp);
+                }
+            }
+            file.close();
 
-    // getting the right index to insert new task in task_file
-    sort(priority_queue.begin(), priority_queue.end());
-    vector<int>::iterator index_itr = upper_bound(priority_queue.begin(), priority_queue.end(), stoi(priority));
-    int index = index_itr - priority_queue.begin() - 1;
+            // Adding new task to the vector
+            tasks.push_back(new_task);
 
-    //updating new task into output vector
-    file.open(task_file, ios::in);
-    if(file) {
-        while(!file.eof()) {
-            getline(file, lines);
-            output.push_back(lines);
+            // Sorting task according to priority
+            sort(begin(tasks), end(tasks));
+
+            // Writing updated Task List to the File
+            file.open(task_file, ios::out);
+            for (auto task : tasks) {
+                file << task << endl;
+            }
+            file.close();
+
         }
     }
-    output.insert(output.begin() + index, new_line);
-    file.close();
-    
-    // inserting output vector into task_file
-    file.open(task_file, ios::out);
-    for (auto i=0; i<output.size()-1; i++) {
-        file << output[i] << endl;
+    catch (string error) {
+        return error;
     }
-    file << output[output.size()-1];
-    file.close();
-
-    //updating meta_file
-    file.open(meta_file, ios::out);
-    for (auto i=0; i<priority_queue.size(); i++) {
-        file << priority_queue[i] << " ";
-    }
-    file.close();
 
     return "Added task: \"" + task  + "\" priority " + priority + "\n";
 
@@ -177,6 +166,9 @@ string ToDo::cmd_report() {
     return output;
 }
 
+
+
+// RETURN COMMAND DETAILS
 string ToDo::cmd_help() {
     string help_msg =  "Usage :-\n"
             "$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list\n"
@@ -210,6 +202,9 @@ vector<string> display_data(string filename) {
     if (fin) {
         while(!fin.eof()) {
             getline(fin, task);
+            if (task.size() == 0) {
+                continue;
+            }
             files_count++;
             temp_output_1 += to_string(files_count) + ". " + task + "\n";
         }
