@@ -17,6 +17,7 @@ string ToDo::cmd_ls() {
      }
 }
 
+// ADD NEW TASK TO THE LIST
 string ToDo::cmd_add(string priority, string task) {
     try {
         // Validating the priority as non-negative number
@@ -51,9 +52,10 @@ string ToDo::cmd_add(string priority, string task) {
 
             // Writing updated Task List to the File
             file.open(task_file, ios::out);
-            for (auto task : tasks) {
-                file << task << endl;
+            for (int i = 0; i < tasks.size() - 1; i++) {
+                file << tasks[i] << endl;
             }
+            file << tasks[tasks.size() - 1];
             file.close();
 
         }
@@ -66,69 +68,56 @@ string ToDo::cmd_add(string priority, string task) {
 
 }
 
-string ToDo::cmd_delete(string task_no) {
-    //validating the task_no as positive number
-    if (!is_number(task_no) || stoi(task_no) <= 0) {
-        return "Error: item with index " + task_no + " does not exist. Nothing deleted.\n";
-    }
-
-    //initalise
-    string queue = "", lines = "", temp="";
-    fstream file;
-    int index = 1;
-    vector<string> output;
-
-    //populate output vector with task_file
-    file.open(task_file, ios::in);
-    if(file) {
-        while(!file.eof()) {
-            getline(file, lines);
-            output.push_back(lines);
+string ToDo::cmd_delete(string task_index) {
+    string del_task = "";
+    try {
+        // validating the task_no as positive number
+        if (!is_number(task_index) || stoi(task_index) <= 0) {
+            throw "Error: Index " + task_index + " is invalid. Nothing deleted.\n";
         }
-    }
-    file.close();
+        else {
+            fstream file;
+            vector<string> tasks;
+            string task;
+            bool has_task = false;
+            int cur_index = 1;
 
-
-    //valading task_no as a proper index
-    if (stoi(task_no) > output.size()) {
-        return "Error: item with index " + task_no + " does not exist. Nothing deleted.\n";
-    }
-
-    //updating task_file 
-    my_buff = output[stoi(task_no) - 1];
-    output.erase(output.begin() + stoi(task_no) - 1);
-    if (output.size() == 0) {
-        char * task_file_char = new char [task_file.size()+1];
-        strcpy (task_file_char, task_file.c_str());
-        int temp1 = remove(task_file_char);
-        char * meta_file_char = new char [meta_file.size()+1];
-        strcpy (meta_file_char, meta_file.c_str());
-        int temp2 = remove(meta_file_char);
-    }
-    else {
-        file.open(task_file, ios::out | ios::trunc);
-        for (int i=0; i<output.size()-1; i++) {
-            file << output[i] << endl;
-        }
-        file << output[output.size()-1];
-        file.close();
-        //updating meta_file 
-        file.open(meta_file, ios::in);
-        getline(file, queue);
-        file.close();
-        stringstream ss(queue);
-        queue = "";
-        index = 1;
-        file.open(meta_file, ios::out);
-        while (ss >> queue) {
-            if (index++ != stoi(task_no)) {
-                file << queue << " ";
+            // Getting task with given index
+            file.open(task_file, ios::in);
+            if (file) {
+                while (!file.eof()) {
+                    getline(file, task);
+                    if (cur_index == stoi(task_index)) {
+                        has_task = true;
+                        del_task += task;
+                    }
+                    else {
+                        tasks.push_back(task);
+                    }
+                    cur_index++;
+                } 
             }
-        }
-        file.close();
-    }
+            file.close();
 
-    return "Deleted item with index " + task_no + "\n";    
+            // No task exists with given index
+            if (has_task == false) {
+                throw "Error: item with index " + task_index + " does not exist. Nothing deleted.\n";
+            } 
+            else {
+                // Updating task file
+                file.open(task_file, ios::out);
+                for (int i = 0; i < tasks.size() - 1; i++) {
+                    file << tasks[i] << endl;
+                }
+                file << tasks[tasks.size() - 1];
+                file.close();
+            }            
+        }
+    }
+    catch (string error) {
+        return error;
+    }
+    return "Deleted item (priority task): " + del_task + "\n";    
 }   
 
 string ToDo::cmd_done(string index) {
