@@ -1,20 +1,15 @@
+#include <fstream>
 #include "implementation.h"
+
 using namespace std;
 
 ToDo::ToDo() {
     complete_file = "complete.txt";
     task_file = "task.txt";
-    meta_file = "meta.txt";
 }
 
-string ToDo::cmd_ls() {
-     vector<string> output = display_data(task_file);
-     if (output[1] != "0") {
-         return output[0];
-     }
-     else {
-         return "There are no pending tasks!";
-     }
+vector<Task> ToDo::cmd_ls() {
+     return get_tasks(task_file);
 }
 
 // ADD NEW TASK TO THE LIST
@@ -25,47 +20,21 @@ string ToDo::cmd_add(string priority, string task) {
             throw "Error: priority " + priority + " is invalid. Nothing added.\n";
         }
         else {
-            fstream file;
-            string temp;
-            string new_task = "";
-            new_task += priority + " " + task;
-            vector<string> tasks;
+            Task obj(task , stoi(priority));
+            
+            ofstream fout;
+            fout.open(task_file, ios::app);
 
-            // Retrieving previous tasks into vector
-            file.open(task_file, ios::in);
-            if (file) {
-                while (!file.eof()) {
-                    getline(file, temp);
-                    if (temp.size() == 0) {
-                        continue;
-                    }
-                    tasks.push_back(temp);
-                }
-            }
-            file.close();
+            fout.write((char*)&obj, sizeof(obj));
 
-            // Adding new task to the vector
-            tasks.push_back(new_task);
+            fout.close();
 
-            // Sorting task according to priority
-            sort(begin(tasks), end(tasks));
-
-            // Writing updated Task List to the File
-            file.open(task_file, ios::out);
-            for (int i = 0; i < tasks.size() - 1; i++) {
-                file << tasks[i] << endl;
-            }
-            file << tasks[tasks.size() - 1];
-            file.close();
-
+            return "Added task: \"" + obj.task  + "\" priority " + to_string(obj.priority) + "\n";
         }
     }
     catch (string error) {
         return error;
     }
-
-    return "Added task: \"" + task  + "\" priority " + priority + "\n";
-
 }
 
 string ToDo::cmd_delete(string task_index) {
@@ -144,15 +113,11 @@ string ToDo::cmd_done(string index) {
     return "Marked item as done.\n";
 }
 
-string ToDo::cmd_report() {
-    vector<string> output_pending = display_data(task_file);
-    vector<string> output_completed = display_data(complete_file);
-    string output;
-    output = "Pending : " + output_pending[1] + "\n";
-    output += output_pending[0];
-    output += "\nCompleted : " + output_completed[1] + "\n";
-    output += output_completed[0];
-    return output;
+vector<vector<Task>> ToDo::cmd_report() {
+    vector<vector<Task>> report;
+    report.push_back(get_tasks(task_file));
+    report.push_back(get_tasks(complete_file));
+    return report;
 }
 
 
@@ -180,32 +145,49 @@ bool is_number(string nums) {
     return true;
 }
 
-vector<string> display_data(string filename) {
+vector<Task> ToDo::get_tasks(string filename) {
     ifstream fin;
-    string task;
-    string temp_output_1;
-    string temp_output_2;
-    vector<string> output;
-    int files_count = 0;
-    fin.open(filename);
-    if (fin) {
-        while(!fin.eof()) {
-            getline(fin, task);
-            if (task.size() == 0) {
-                continue;
-            }
-            files_count++;
-            temp_output_1 += to_string(files_count) + ". " + task + "\n";
-        }
+    Task obj;
+    vector<Task> tasks;
+
+    fin.open(filename, ios::in);
+
+    if(!fin) {
+        return tasks;
     }
-    fin.close();
-    temp_output_2 = to_string(files_count);
-    output.push_back(temp_output_1);
-    output.push_back(temp_output_2);
-    return output;
+
+    fin.read((char*)&obj, sizeof(obj));
+
+    while (!fin.eof()) {
+        tasks.push_back(obj);
+        fin.read((char*)&obj, sizeof(obj));
+    }
+
+    sort(tasks.begin(), tasks.end(), sort_task);
+
+    return tasks;
 }
 
 string error_msg(int i) {
     vector<string> errors_mgs = {"Error: Missing tasks string. Nothing added!", "Error: Missing NUMBER for deleting tasks."};
     return errors_mgs[i];
+}
+
+bool sort_task(Task &a, Task &b) {
+    if (a.priority < b.priority) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+void display(vector<Task> &tasks) {
+    cout << "Total: " << tasks.size() << endl;
+    for (int i = 0; i < tasks.size(); i++) {
+        cout << i + 1 << ": " << tasks[i].task << " (Priority #" << tasks[i].priority << ")" << endl; 
+    }
+    cout << endl << endl;
+
+    return ;
 }

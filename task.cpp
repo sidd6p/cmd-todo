@@ -9,10 +9,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     else if (args[1] == "ls") {
-        cout << session.cmd_ls();
+        vector<Task> tasks = session.cmd_ls();
+        display(tasks);
     }
     else if (args[1] == "report") {
-        cout << session.cmd_report();
+        vector<vector<Task>> reports =  session.cmd_report();
+        for (auto report : reports) {
+            display(report);
+        }
     }
     else if (args[1] == "done") {
         cout << session.cmd_done(args[2]);

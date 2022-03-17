@@ -3,6 +3,22 @@
 
 using namespace std;
 
+
+class Task {
+    public:
+        string task;
+        int priority;
+    public:
+        Task () {
+
+        }
+        Task(string task, int priority) {
+            this->task = task;
+            this->priority = priority;
+        }
+};
+
+
 class ToDo {
     private:
         string complete_file;
@@ -11,15 +27,18 @@ class ToDo {
         string my_buff;
     public:
         ToDo();
-        string cmd_ls();
+        vector<Task> cmd_ls();
         string cmd_add(string , string);
         string cmd_delete(string);
-        string cmd_report();
+        vector<vector<Task>> cmd_report();
         string cmd_done(string);
         string cmd_help();
+        vector<Task> get_tasks(string);
 };
 
 
 bool is_number(string);
 vector<string> display_data(string);
 string error_msg(int); 
+void display(vector<Task> &);
+bool sort_task(Task&, Task&);
