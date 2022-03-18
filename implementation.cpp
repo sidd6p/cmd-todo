@@ -20,12 +20,18 @@ string ToDo::cmd_add(string priority, string task) {
             throw "Error: priority " + priority + " is invalid. Nothing added.\n";
         }
         else {
+            vector<Task> tasks = get_tasks(task_file);
             Task obj(task , stoi(priority));
+            tasks.push_back(obj);
+
+            sort(tasks.begin(), tasks.end(), sort_task);
             
             ofstream fout;
-            fout.open(task_file, ios::app);
+            fout.open(task_file);
 
-            fout.write((char*)&obj, sizeof(obj));
+            for (auto task : tasks) {
+                fout.write((char*)&task, sizeof(task));
+            }
 
             fout.close();
 
@@ -38,55 +44,37 @@ string ToDo::cmd_add(string priority, string task) {
 }
 
 string ToDo::cmd_delete(string task_index) {
-    string del_task = "";
+    Task del_task;
     try {
         // validating the task_no as positive number
         if (!is_number(task_index) || stoi(task_index) <= 0) {
             throw "Error: Index " + task_index + " is invalid. Nothing deleted.\n";
         }
         else {
-            fstream file;
-            vector<string> tasks;
-            string task;
-            bool has_task = false;
-            int cur_index = 1;
+            vector<Task> tasks = get_tasks(task_file);
 
-            // Getting task with given index
-            file.open(task_file, ios::in);
-            if (file) {
-                while (!file.eof()) {
-                    getline(file, task);
-                    if (cur_index == stoi(task_index)) {
-                        has_task = true;
-                        del_task += task;
-                    }
-                    else {
-                        tasks.push_back(task);
-                    }
-                    cur_index++;
-                } 
+            if (tasks.size() < stoi(task_index)) {
+                throw "Error: Index " + task_index + " does not exists. Nothing deleted.\n";
             }
-            file.close();
-
-            // No task exists with given index
-            if (has_task == false) {
-                throw "Error: item with index " + task_index + " does not exist. Nothing deleted.\n";
-            } 
             else {
-                // Updating task file
-                file.open(task_file, ios::out);
-                for (int i = 0; i < tasks.size() - 1; i++) {
-                    file << tasks[i] << endl;
+                del_task = tasks[stoi(task_index) - 1];
+                tasks.erase(tasks.begin() + stoi(task_index) - 1);
+
+                ofstream fout;
+                fout.open(task_file);
+
+                for (auto task : tasks) {
+                    fout.write((char*)&task, sizeof(task));
                 }
-                file << tasks[tasks.size() - 1];
-                file.close();
-            }            
+
+                fout.close();
+            }
         }
     }
     catch (string error) {
         return error;
     }
-    return "Deleted item (priority task): " + del_task + "\n";    
+    return "Deleted task (task's priority): " + del_task.task + " #" + to_string(del_task.priority) + "\n";    
 }   
 
 string ToDo::cmd_done(string index) {
@@ -163,8 +151,6 @@ vector<Task> ToDo::get_tasks(string filename) {
         fin.read((char*)&obj, sizeof(obj));
     }
 
-    sort(tasks.begin(), tasks.end(), sort_task);
-
     return tasks;
 }
 
@@ -184,8 +170,9 @@ bool sort_task(Task &a, Task &b) {
 
 void display(vector<Task> &tasks) {
     cout << "Total: " << tasks.size() << endl;
-    for (int i = 0; i < tasks.size(); i++) {
-        cout << i + 1 << ": " << tasks[i].task << " (Priority #" << tasks[i].priority << ")" << endl; 
+    int index = 1;
+    for (auto task : tasks) {
+        cout << index++ << ": " << task.task << " (Priority #" << task.priority << ")" << endl; 
     }
     cout << endl << endl;
 
